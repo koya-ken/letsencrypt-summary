@@ -2,17 +2,17 @@
 
 # letsencryptを使ってcurlで発生する問題
 
-2021/09/30以降 openssl 1.0.2を使用しており、ルート証明書に
-「DST Root CA X3」が含まれている場合、証明書のチェックに失敗する
-openssl 1.1.0 以降では上記の証明書でもエラーにならない。
+2021/09/30以降 openssl 1.0.2を使用しており、ルート証明書に  
+「DST Root CA X3」が含まれている場合、証明書のチェックに失敗する  
+openssl 1.1.0 以降では上記の証明書でもエラーにならない。  
 
-「DST Root CA X3」を含めないようにするにはcertbotのオプションに--preferred-chain "ISRG Root X1"を足す
+「DST Root CA X3」を含めないようにするにはcertbotのオプションに--preferred-chain "ISRG Root X1"を足す  
 
-https://www.openssl.org/blog/blog/2021/09/13/LetsEncryptRootCertExpire/
-https://qiita.com/tana6/items/46976e2ff5c875c13327
+https://www.openssl.org/blog/blog/2021/09/13/LetsEncryptRootCertExpire/  
+https://qiita.com/tana6/items/46976e2ff5c875c13327  
 
-意図した証明書のパスになっているかはブラウザでは確認できない。
-直接opensslコマンドなどで確認する。
+意図した証明書のパスになっているかはブラウザでは確認できない。  
+直接opensslコマンドなどで確認する。  
 
 ## 設定が効いている証明書
 ```
@@ -59,38 +59,38 @@ Certificate chain
 
 # windowsのcurlの仕様
 
-Windowsに標準でインストールされているcurlはバックエンドにWinSSLを使用しており、
-失効サーバーのチェックを行っている。
-Linuxのcurlやopensslバックエンドでは行われていない？模様。
+Windowsに標準でインストールされているcurlはバックエンドにWinSSLを使用しており、  
+失効サーバーのチェックを行っている。  
+Linuxのcurlやopensslバックエンドでは行われていない？模様。  
 
-またletsencryptの失効サーバーはocspで確認しており
-期限は1週間。
-※仕様としてはcrlは7日以上10日以下、ocspは4日以上10日以下ということらしい
-https://www.digicert.co.jp/welcome/pdf/wp_ssl_handshake.pdf
+またletsencryptの失効サーバーはocspで確認しており  
+期限は1週間。  
+※仕様としてはcrlは7日以上10日以下、ocspは4日以上10日以下ということらしい  
+https://www.digicert.co.jp/welcome/pdf/wp_ssl_handshake.pdf  
 
-証明書の期限が切れていなくても失効サーバーの更新期間を過ぎているとエラーになる。
-そのため、クライアントの日付をいじって確認する場合、この期間を過ぎないように調整する必要がある。
-※つまり1週間分くらいしか確認できない
+証明書の期限が切れていなくても失効サーバーの更新期間を過ぎているとエラーになる。  
+そのため、クライアントの日付をいじって確認する場合、この期間を過ぎないように調整する必要がある。  
+※つまり1週間分くらいしか確認できない  
 ```
 * schannel: next InitializeSecurityContext failed: Unknown error (0x80092013) - 失効サーバーがオフラインのため、失効の関数は失効を確認できませんでした。
 ```
 
-windowsのocspやcrlはキャッシュが効くため、wiresharkなどで通信を行っているか確認したほうがいい。
-https://jp.globalsign.com/support/faq/598.html
+windowsのocspやcrlはキャッシュが効くため、wiresharkなどで通信を行っているか確認したほうがいい。  
+https://jp.globalsign.com/support/faq/598.html  
 
-また失効一覧更新時間を過ぎても、サーバークライアントで同期が取れていない場合を考慮して
-一定時間のずれを許容するようなオプションがある場合がある※クライアント実装。
-Windowsのcurlは少なくともデフォルトでは許容されていなさそう。
+また失効一覧更新時間を過ぎても、サーバークライアントで同期が取れていない場合を考慮して  
+一定時間のずれを許容するようなオプションがある場合がある※クライアント実装。  
+Windowsのcurlは少なくともデフォルトでは許容されていなさそう。  
 
-opensslの場合は5分。
-validity_period 
-http://home.att.ne.jp/theta/diatom/ocsp%281%29.html
+opensslの場合は5分。  
+validity_period   
+http://home.att.ne.jp/theta/diatom/ocsp%281%29.html  
 
 # OCSPの挙動
 
-サーバー側の設定でOCSPのレスポンスまで返してくれる場合、
-クライアント側でOCSPをチェックしに行くことはなさそう。
-この場合クライアントの日付を変えてもocspに影響はないため、純粋に証明書の有効期限のチェックのみになる。
+サーバー側の設定でOCSPのレスポンスまで返してくれる場合、  
+クライアント側でOCSPをチェックしに行くことはなさそう。  
+この場合クライアントの日付を変えてもocspに影響はないため、純粋に証明書の有効期限のチェックのみになる。  
 
 ## OCSPのレスポンスを返すサーバー
 
@@ -135,8 +135,8 @@ OCSP response: no response sent
 ...
 ```
 
-apacheの場合はSSLUseStaplingで設定
+apacheの場合はSSLUseStaplingで設定  
 
-https://www.cybertrust.co.jp/sureserver/support/files/apache_ocsp.pdf
-https://blog.apar.jp/linux/8041/
-https://qiita.com/ariaki/items/78ed2d3810ad17f72398
+https://www.cybertrust.co.jp/sureserver/support/files/apache_ocsp.pdf  
+https://blog.apar.jp/linux/8041/  
+https://qiita.com/ariaki/items/78ed2d3810ad17f72398  
